@@ -11,6 +11,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Place } from './entities/place.entity';
 import { DataSource, Repository } from 'typeorm';
 import { PlaceImage } from './entities/place-image.entity';
+import { SearchPlaceInput } from './dto/search-place.input';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class PlaceService {
@@ -24,9 +26,13 @@ export class PlaceService {
     private readonly datasource: DataSource,
   ) {}
 
-  async create(createPlaceInput: CreatePlaceInput) {
+  async create(createPlaceInput: CreatePlaceInput, user: User) {
     try {
-      const { images = [], ...placeDetails } = createPlaceInput;
+      const {
+        images = [],
+
+        ...placeDetails
+      } = createPlaceInput;
 
       const placeImages = images.map((imageUrl) =>
         this.imageRepository.create({ url: imageUrl }),
@@ -34,6 +40,7 @@ export class PlaceService {
 
       const place = this.placeRepository.create({
         ...placeDetails,
+        user,
       });
 
       place.images = placeImages;
@@ -53,9 +60,106 @@ export class PlaceService {
       });
       return places;
     } catch (error) {
-      this.logger.log(error);
       throw new InternalServerErrorException('Something bad happened');
     }
+  }
+
+  async findMyPlaces(user: User): Promise<Place[]> {
+    try {
+      const places = await this.placeRepository.find({
+        relations: { images: true },
+        where: {
+          user: {
+            id: user.id,
+          },
+        },
+      });
+      return places;
+    } catch (error) {
+      throw new InternalServerErrorException('Something bad happened');
+    }
+  }
+
+  async findByTerm(searchPlaceInput: SearchPlaceInput) {
+    if (JSON.stringify(searchPlaceInput) === '{}')
+      throw new NotFoundException('Debes enviar mínimo un término de filtro');
+
+    const queryBuilder = this.placeRepository.createQueryBuilder('place');
+    queryBuilder.leftJoinAndSelect('place.images', 'image');
+    let isFirstCondition = true;
+
+    Object.entries(searchPlaceInput).forEach(([key, value]) => {
+      switch (key) {
+        case 'titleText':
+          if (isFirstCondition) {
+            queryBuilder.where(
+              'similarity(LOWER(place.titleText), LOWER(:titleText)) >= 0.1',
+              {
+                titleText: value.toLowerCase(),
+              },
+            );
+            queryBuilder.orWhere(
+              'LOWER(place.titleText) LIKE LOWER(:titleText)',
+              {
+                titleText: `%${value.toLowerCase()}%`,
+              },
+            );
+            isFirstCondition = false;
+          } else {
+            queryBuilder.where(
+              'LOWER(place.titleText) LIKE LOWER(:titleText)',
+              {
+                titleText: `%${value.toLowerCase()}%`,
+              },
+            );
+          }
+          break;
+
+        case 'typeEvent':
+          if (isFirstCondition) {
+            queryBuilder.where('place.typeEvent = :typeEvent', {
+              typeEvent: value,
+            });
+            isFirstCondition = false;
+          } else {
+            queryBuilder.andWhere('place.typeEvent = :typeEvent', {
+              typeEvent: value,
+            });
+          }
+          break;
+
+        case 'dateEventStart':
+          if (isFirstCondition) {
+            queryBuilder.where('place.dateEventStart >= :dateEventStart', {
+              dateEventStart: value,
+            });
+            isFirstCondition = false;
+          } else {
+            queryBuilder.andWhere('place.dateEventStart >= :dateEventStart', {
+              dateEventStart: value,
+            });
+          }
+          break;
+
+        case 'dateEventEnd':
+          if (isFirstCondition) {
+            queryBuilder.where('place.dateEventEnd <= :dateEventEnd', {
+              dateEventEnd: value,
+            });
+            isFirstCondition = false;
+          } else {
+            queryBuilder.andWhere('place.dateEventEnd <= :dateEventEnd', {
+              dateEventEnd: value,
+            });
+          }
+          break;
+
+        default:
+          break;
+      }
+    });
+
+    return queryBuilder.getMany();
   }
 
   async findOne(id: string): Promise<Place> {
@@ -103,8 +207,8 @@ export class PlaceService {
   }
 
   async remove(id: string) {
-    const product = await this.findOne(id);
-    await this.placeRepository.remove(product);
+    const place = await this.findOne(id);
+    await this.placeRepository.remove(place);
     return `this action removes  #${id} place`;
   }
 }

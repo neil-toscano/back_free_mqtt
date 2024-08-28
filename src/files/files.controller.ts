@@ -21,7 +21,7 @@ export class FilesController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor('files', {
       fileFilter: fileFilter,
     }),
   )
@@ -35,7 +35,7 @@ export class FilesController {
     return this.filesService.uploadFile(file);
   }
 
-  @Get()
+  @Post('h')
   findAll() {
     return this.filesService.findAll();
   }
@@ -53,5 +53,11 @@ export class FilesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.filesService.remove(+id);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('files'))
+  async uploadFile(@UploadedFile() files) {
+    console.log(files);
   }
 }

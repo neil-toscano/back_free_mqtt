@@ -27,10 +27,10 @@ export class SeedService {
   }
 
   async loadPlaces() {
-    const places = [];
-    for (const place of SEED_PLACES) {
-      places.push(await this.placeService.create(place));
-    }
+    // const places = [];
+    // for (const place of SEED_PLACES) {
+    //   places.push(await this.placeService.create(place));
+    // }
     return;
   }
 }

@@ -14,10 +14,13 @@ import { CommonModule } from './common/common.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { SeedModule } from './seed/seed.module';
 import { Place } from './place/entities/place.entity';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -40,6 +43,9 @@ import { Place } from './place/entities/place.entity';
     CommonModule,
     CloudinaryModule,
     SeedModule,
+    AuthModule,
+    UsersModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

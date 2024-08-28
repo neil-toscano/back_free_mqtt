@@ -8,74 +8,243 @@ type PlaceImage {
   place: Place!
 }
 
+type Profile {
+  id: ID!
+  fullName: String!
+  description: String!
+  url: String!
+  phoneNumber: String!
+  user: User!
+}
+
+type User {
+  id: ID!
+  fullName: String!
+  email: String!
+  roles: [String!]!
+  isActive: Boolean!
+}
+
 type Place {
   """Id"""
   id: ID!
 
   """The name of the place"""
-  name: String!
+  titleText: String!
 
   """A description of the place"""
-  description: String!
+  descriptionPlace: String!
 
-  """The address of visiting the place"""
-  address: String!
+  """The date of event START"""
+  dateEventStart: String!
 
-  """The price of visiting the place"""
+  """The date of event END"""
+  dateEventEnd: String!
+
+  """The Time of visiting the place"""
+  timeEvent: String!
+
+  """The type of visiting the place"""
+  typeEvent: String!
+
+  """The type of transport"""
+  typeTransport: String!
+
+  """Number of people and guide in JSON format (parsed)"""
+  cantidad: String!
+
+  """Services provided"""
+  services: String!
+
+  """To-dos for the event"""
+  todos: String!
+
+  """Price list for visiting the place"""
+  listPrice: String!
+
+  """Price of visiting the place"""
   price: Float!
-
-  """The start date of availability"""
-  startDate: String!
+  isActive: Boolean!
+  user: User!
 
   """list of images"""
   images: [PlaceImage!]!
 }
 
+type Auth {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type AuthResponse {
+  token: String!
+  user: User!
+}
+
 type Query {
   getAllPlaces: [Place!]!
+  getMyPlaces: [Place!]!
   getById(id: String!): Place!
+  getByTerm(searchPlaceInput: SearchPlaceInput!): [Place!]!
+  lookUp: AuthResponse!
+  auth(id: Int!): Auth!
+  users: [User!]!
+  find_all_profiles: [Profile!]!
+  profile_find_one: Profile!
+  profile_find_by_user(id: String!): Profile!
 }
+
+input SearchPlaceInput {
+  """The name of the place"""
+  titleText: String
+
+  """The START date of the event"""
+  dateEventStart: DateTime
+
+  """The END date of the event dateString 2024-5-5"""
+  dateEventEnd: DateTime
+
+  """Type of the event """
+  typeEvent: String
+
+  """The price of visiting the place"""
+  price: Float
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Mutation {
   createPlace(createPlaceInput: CreatePlaceInput!): Place!
   updatePlace(updatePlaceInput: UpdatePlaceInput!): Place!
   removePlace(id: String!): String!
   executeSeed: Boolean!
+  loginGoogle(loginInput: LoginInput!): AuthResponse!
+  removeAuth(id: Int!): Auth!
+  removeUser(id: Int!): User!
+  createProfile(createProfileInput: CreateProfileInput!): Profile!
+  update_profile(updateProfileInput: UpdateProfileInput!): Profile!
+  updates(updateProfileInput: UpdateProfileInput!): Profile!
+  removeProfile(id: Int!): Profile!
 }
 
 input CreatePlaceInput {
   """The name of the place"""
-  name: String!
+  titleText: String!
 
   """A description of the place"""
-  description: String!
+  descriptionPlace: String!
 
-  """The price of visiting the place"""
-  address: String!
+  """The START date of the event"""
+  dateEventStart: DateTime!
+
+  """The END date of the event dateString 2024-5-5"""
+  dateEventEnd: DateTime!
+
+  """Time of the event"""
+  timeEvent: String!
+
+  """Type of the event """
+  typeEvent: String!
+
+  """Type of transport"""
+  typeTransport: String!
+
+  """Number of people and guide in JSON format (parsed)"""
+  cantidad: String!
+
+  """Services provided"""
+  services: String!
+
+  """To-dos for the event"""
+  todos: String!
+
+  """The price of visiting the place-list"""
+  listPrice: String!
 
   """The price of visiting the place"""
   price: Float!
 
-  """The start date of availability"""
-  startDate: String!
+  """is active the place"""
+  isActive: Boolean!
   images: [String!]
 }
 
 input UpdatePlaceInput {
   """The name of the place"""
-  name: String
+  titleText: String
 
   """A description of the place"""
-  description: String
+  descriptionPlace: String
 
-  """The price of visiting the place"""
-  address: String
+  """The START date of the event"""
+  dateEventStart: DateTime
+
+  """The END date of the event dateString 2024-5-5"""
+  dateEventEnd: DateTime
+
+  """Time of the event"""
+  timeEvent: String
+
+  """Type of the event """
+  typeEvent: String
+
+  """Type of transport"""
+  typeTransport: String
+
+  """Number of people and guide in JSON format (parsed)"""
+  cantidad: String
+
+  """Services provided"""
+  services: String
+
+  """To-dos for the event"""
+  todos: String
+
+  """The price of visiting the place-list"""
+  listPrice: String
 
   """The price of visiting the place"""
   price: Float
 
-  """The start date of availability"""
-  startDate: String
+  """is active the place"""
+  isActive: Boolean
   images: [String!]
   id: String!
+}
+
+input LoginInput {
+  email: String
+  fullName: String
+}
+
+input CreateProfileInput {
+  """Name-profile"""
+  fullName: String!
+
+  """Description-profile"""
+  description: String!
+
+  """Url photo-profile"""
+  url: String!
+
+  """Phone-Number"""
+  phoneNumber: String!
+}
+
+input UpdateProfileInput {
+  """Name-profile"""
+  fullName: String
+
+  """Description-profile"""
+  description: String
+
+  """Url photo-profile"""
+  url: String
+
+  """Phone-Number"""
+  phoneNumber: String
+  id: ID!
 }
