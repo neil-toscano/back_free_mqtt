@@ -82,10 +82,13 @@ export class CreatePlaceInput {
   @IsInt()
   price: number;
 
-  @Field(() => Boolean, { description: 'is active the place' })
+  @Field(() => Boolean, {
+    description: 'is active the place',
+    defaultValue: true,
+  })
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean;
+  isActive?: boolean = true;
 
   @Field(() => [String], { nullable: true })
   @IsArray()

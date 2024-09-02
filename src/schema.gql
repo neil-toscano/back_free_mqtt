@@ -168,7 +168,7 @@ input CreatePlaceInput {
   price: Float!
 
   """is active the place"""
-  isActive: Boolean!
+  isActive: Boolean! = true
   images: [String!]
 }
 
@@ -210,7 +210,7 @@ input UpdatePlaceInput {
   price: Float
 
   """is active the place"""
-  isActive: Boolean
+  isActive: Boolean = true
   images: [String!]
   id: String!
 }

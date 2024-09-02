@@ -9,7 +9,7 @@ import { CreatePlaceInput } from './dto/create-place.input';
 import { UpdatePlaceInput } from './dto/update-place.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Place } from './entities/place.entity';
-import { DataSource, Repository } from 'typeorm';
+import { Brackets, DataSource, Repository } from 'typeorm';
 import { PlaceImage } from './entities/place-image.entity';
 import { SearchPlaceInput } from './dto/search-place.input';
 import { User } from 'src/users/entities/user.entity';
@@ -93,20 +93,20 @@ export class PlaceService {
         case 'titleText':
           if (isFirstCondition) {
             queryBuilder.where(
-              'similarity(LOWER(place.titleText), LOWER(:titleText)) >= 0.1',
-              {
-                titleText: value.toLowerCase(),
-              },
-            );
-            queryBuilder.orWhere(
-              'LOWER(place.titleText) LIKE LOWER(:titleText)',
-              {
-                titleText: `%${value.toLowerCase()}%`,
-              },
+              new Brackets((qb) => {
+                qb.where(
+                  'similarity(LOWER(place.titleText), LOWER(:titleText)) >= 0.1',
+                  {
+                    titleText: value.toLowerCase(),
+                  },
+                ).orWhere('LOWER(place.titleText) LIKE LOWER(:titleText)', {
+                  titleText: `%${value.toLowerCase()}%`,
+                });
+              }),
             );
             isFirstCondition = false;
           } else {
-            queryBuilder.where(
+            queryBuilder.andWhere(
               'LOWER(place.titleText) LIKE LOWER(:titleText)',
               {
                 titleText: `%${value.toLowerCase()}%`,
@@ -158,7 +158,21 @@ export class PlaceService {
           break;
       }
     });
+    return queryBuilder.getMany();
+  }
 
+  async findByTermTest(searchPlaceInput: SearchPlaceInput) {
+    if (JSON.stringify(searchPlaceInput) === '{}') {
+      throw new NotFoundException('Debes enviar mínimo un término de filtro');
+    }
+
+    const queryBuilder = this.placeRepository.createQueryBuilder('place');
+
+    if (searchPlaceInput.dateEventStart) {
+      queryBuilder.where('place.dateEventStart >= :dateEventStart', {
+        dateEventStart: searchPlaceInput.dateEventStart,
+      });
+    }
     return queryBuilder.getMany();
   }
 

@@ -26,6 +26,7 @@ export class ProfileResolver {
   }
 
   @Query(() => Profile, { name: 'profile_find_one' })
+  @UseGuards(GqlAuthGuard)
   findOne(@CurrentUser() user: User) {
     return this.profileService.findOne(user.id);
   }
@@ -51,8 +52,7 @@ export class ProfileResolver {
   async updates(
     @Args('updateProfileInput') updateProfileInput: UpdateProfileInput,
   ) {
-    console.log(updateProfileInput.id);
-    return this.profileService.findOne('1234sfslf');
+    return this.profileService.findOne(updateProfileInput.id);
   }
 
   @Mutation(() => Profile)

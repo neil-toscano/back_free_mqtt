@@ -42,6 +42,7 @@ export class PlaceResolver {
   async findByTerm(
     @Args('searchPlaceInput') searchPlaceInput: SearchPlaceInput,
   ): Promise<Place[]> {
+    console.log(searchPlaceInput);
     return this.placeService.findByTerm(searchPlaceInput);
   }
 
