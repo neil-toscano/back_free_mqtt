@@ -8,6 +8,7 @@ import { GqlAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/users/entities/user.entity';
+import { PaginationArgs } from 'src/common/dto/args/pagination.args';
 
 @Resolver(() => Place)
 export class PlaceResolver {
@@ -23,8 +24,8 @@ export class PlaceResolver {
   }
 
   @Query(() => [Place], { name: 'getAllPlaces' })
-  async findAll(): Promise<Place[]> {
-    return this.placeService.findAll();
+  async findAll(@Args() paginationArgs: PaginationArgs): Promise<Place[]> {
+    return this.placeService.findAll(paginationArgs);
   }
 
   @Query(() => [Place], { name: 'getMyPlaces' })

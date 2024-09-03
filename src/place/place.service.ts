@@ -13,6 +13,7 @@ import { Brackets, DataSource, Repository } from 'typeorm';
 import { PlaceImage } from './entities/place-image.entity';
 import { SearchPlaceInput } from './dto/search-place.input';
 import { User } from 'src/users/entities/user.entity';
+import { PaginationArgs } from 'src/common/dto/args/pagination.args';
 
 @Injectable()
 export class PlaceService {
@@ -53,15 +54,23 @@ export class PlaceService {
     }
   }
 
-  async findAll(): Promise<Place[]> {
+  async findAll(paginationArgs: PaginationArgs): Promise<Place[]> {
+    const { limit, offset } = paginationArgs;
+
     try {
-      const places = await this.placeRepository.find({
-        relations: { images: true },
-      });
+      const places = await this.placeRepository
+        .createQueryBuilder('place')
+        .leftJoinAndSelect('place.images', 'images') // Agrega las relaciones aquí
+        .take(limit)
+        .skip(offset)
+        .getMany();
+  
       return places;
     } catch (error) {
       throw new InternalServerErrorException('Something bad happened');
     }
+
+   
   }
 
   async findMyPlaces(user: User): Promise<Place[]> {

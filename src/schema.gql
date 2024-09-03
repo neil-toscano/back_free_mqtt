@@ -82,7 +82,7 @@ type AuthResponse {
 }
 
 type Query {
-  getAllPlaces: [Place!]!
+  getAllPlaces(offset: Int = 0, limit: Int = 10): [Place!]!
   getMyPlaces: [Place!]!
   getById(id: String!): Place!
   getByTerm(searchPlaceInput: SearchPlaceInput!): [Place!]!

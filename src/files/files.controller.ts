@@ -35,7 +35,7 @@ export class FilesController {
     return this.filesService.uploadFile(file);
   }
 
-  @Post('h')
+  @Post()
   findAll() {
     return this.filesService.findAll();
   }
